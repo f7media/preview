@@ -41,7 +41,7 @@ class PreviewUserAuthentication extends BackendUserAuthentication
      * @param array $row
      * @return int
      */
-    public function calcPerms($row): int
+    public function calcPerms($row, bool $useDeleteClause = true): int
     {
         return Permission::PAGE_SHOW;
     }

@@ -123,7 +123,6 @@ class Preview implements MiddlewareInterface
      */
     protected function setBackendUserAspect(BackendUserAuthentication $user = null): void
     {
-        debug($user, 'user');
         $this->context->setAspect(
             'backend.user',
             GeneralUtility::makeInstance(UserAspect::class, $user)

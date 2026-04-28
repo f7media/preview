@@ -85,7 +85,6 @@ class PreviewController
         if ($linkInformation === []) {
             $configuration = $this->extensionConfiguration->get('preview');
             $lifetime = (int)$configuration['lifetime'];
-            debug($lifetime);
             $previewUriBuilder = new PreviewUriBuilder();
             $previewUriBuilder->generatePreviewUrl($pageId, $languageId, $lifetime);
         }

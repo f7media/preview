@@ -16,7 +16,7 @@ use F7\Preview\Utility\PreviewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -58,7 +58,7 @@ class PreviewController
      */
     protected $extensionConfiguration;
 
-    public function __construct(ModuleTemplate $moduleTemplate = null, IconFactory $iconFactory = null, SiteFinder $siteFinder = null, ExtensionConfiguration $extensionConfiguration = null)
+    public function __construct(?ModuleTemplate $moduleTemplate = null, ?IconFactory $iconFactory = null, ?SiteFinder $siteFinder = null, ?ExtensionConfiguration $extensionConfiguration = null)
     {
        // $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
@@ -75,43 +75,39 @@ class PreviewController
         $this->view->setTemplateRootPaths(['EXT:preview/Resources/Private/Templates/Preview']);
     }
 
-    public function addLinkAction(): ResponseInterface
+    public function addLinkAction(ServerRequestInterface $request): ResponseInterface
     {
-        $pageId = (int)$_REQUEST['addLink']['page'];
-        $languageId = (int)$_REQUEST['addLink']['language'];
+        $body = $request->getParsedBody();
+        $pageId = (int)($body['addLink']['page'] ?? 0);
+        $languageId = (int)($body['addLink']['language'] ?? 0);
         // check if link already exist
         $linkInformation = PreviewUtility::getPreviewLink($pageId, $languageId);
 
         if ($linkInformation === []) {
             $configuration = $this->extensionConfiguration->get('preview');
             $lifetime = (int)$configuration['lifetime'];
-            debug($lifetime);
             $previewUriBuilder = new PreviewUriBuilder();
             $previewUriBuilder->generatePreviewUrl($pageId, $languageId, $lifetime);
         }
 
-        $this->redirectToPage($pageId);
-
-        return new HtmlResponse('');
+        return $this->redirectToPage($pageId);
     }
 
-    public function removeLinkAction(): ResponseInterface
+    public function removeLinkAction(ServerRequestInterface $request): ResponseInterface
     {
-        $pageId = (int)$_REQUEST['removeLink']['page'];
-        $languageId = (int)$_REQUEST['removeLink']['language'];
+        $body = $request->getParsedBody();
+        $pageId = (int)($body['removeLink']['page'] ?? 0);
+        $languageId = (int)($body['removeLink']['language'] ?? 0);
 
         PreviewUtility::removeLink($pageId, $languageId);
 
-        $this->redirectToPage($pageId);
-
-        return new HtmlResponse('');
+        return $this->redirectToPage($pageId);
     }
 
-    private function redirectToPage(int $pageId): void
+    private function redirectToPage(int $pageId): ResponseInterface
     {
-        // redirect to page again
         $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
         $uri = $backendUriBuilder->buildUriFromRoute('web_layout', ['id' => $pageId]);
-        header('Location: ' . $uri);
+        return new RedirectResponse((string)$uri);
     }
 }

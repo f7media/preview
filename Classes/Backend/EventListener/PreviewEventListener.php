@@ -47,7 +47,7 @@ final  class PreviewEventListener
         $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
 
         $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageId);
-        $pageIsTranslatedInLanguages = $this->getLanguageVariants();
+        $pageIsTranslatedInLanguages = $this->getLanguageVariants($pageId);
 
         // If all translations of this page are already published, do not render anything and leave.
         if (empty($this->notPublishedLanguages)) {
@@ -120,9 +120,8 @@ final  class PreviewEventListener
     /**
      * This method returns an array with all language ids the current page is translated to.
      */
-    private function getLanguageVariants(): array
+    private function getLanguageVariants(int $pageId): array
     {
-        $pageId = (int)$_GET['id'];
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeAll()

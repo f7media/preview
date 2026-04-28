@@ -42,7 +42,7 @@ class Preview implements MiddlewareInterface
     public const REQUEST_ATTRIBUTE = 'tx_preview';
 
 
-    public function __construct(Context $context = null)
+    public function __construct(?Context $context = null)
     {
         $this->context = $context ?? GeneralUtility::makeInstance(Context::class);
     }
@@ -123,7 +123,6 @@ class Preview implements MiddlewareInterface
      */
     protected function setBackendUserAspect(BackendUserAuthentication $user = null): void
     {
-        debug($user, 'user');
         $this->context->setAspect(
             'backend.user',
             GeneralUtility::makeInstance(UserAspect::class, $user)
